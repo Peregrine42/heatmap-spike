@@ -1,0 +1,38 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <canvas id="target" width= "625" height="800" style="position: absolute; left: 0; top: 0; z-index: 2;">
+    </canvas>
+    <canvas id="flags-target" width= "625" height="800" style="position: absolute; left: 0; top: 0; z-index: 1;">
+    </canvas>
+    <canvas id="background-target" width= "625" height="800" style="position: absolute; left: 0; top: 0; z-index: 0;">
+    </canvas>
+  </body>
+  <script src="simpleheat.js"></script>
+  <script>
+    window.onload = function() {
+      var c=document.getElementById("background-target");
+      var ctx=c.getContext("2d");
+      var img = new Image();
+      img.onload = function () {
+            ctx.drawImage(img, 0, 0, 1250/2, 1600/2);
+      };
+      img.src = "uk-map.png";
+
+      var heat = simpleheat("target");
+
+      var points = [
+        [ 500, 600, 1 ],
+        [ 410, 500, 1 ],
+        [ 430, 400, 0.5 ],
+      ]
+
+      heat.data(points);
+
+      heat.radius(40, 40);
+      heat.gradient({"0": "moccasin", "0.1": "yellow", "1": "red"});
+      heat.draw(0.2);
+    }
+  </script>
+</html>
