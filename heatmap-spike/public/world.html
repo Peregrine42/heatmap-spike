@@ -1,0 +1,74 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div id="container" style="background-color: white; position: relative; width: 1000; height: 600;"></div>
+  </body>
+  <script src="d3.js"></script>
+  <script src="topojson.js"></script>
+  <script src="datamaps.all.js"></script>
+  <script src="jquery.min.js"></script>
+  <script src="velocity.min.js"></script>
+  <script>
+    function handle_message(data) {
+      var msg = $.parseJSON(data);
+      msg.events.forEach(function(item) {
+        var element = $("." + item.target);
+
+        var value = parseFloat(item.value);
+        element.velocity({fill: color(value) }, {duration: 1000})
+      })
+    };
+
+    function handle_server_event(e) {
+      handle_message(e.data);
+    };
+
+    var width = $(window).width();
+    var height = width;
+    $("#container").width(width);
+    $("#container").height(height);
+
+    var highlight = "#FF0000";
+    var lowlight = "#895CCD";
+    var normal = "#000000";
+
+    var color = d3.scale.linear()
+      .domain([-1, 0, 1])
+      .range([lowlight, normal, highlight]);
+
+    d3.json("uk_areas.json", function(error, uk) {
+      if (error) return console.error(error);
+
+      var svg = d3.select("#container").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      var projection = d3.geo.albers()
+        .center([0, 55.4])
+        .rotate([4.4, 0])
+        .parallels([50, 60])
+        .scale(6000)
+        .translate([width / 2, height / 2]);
+
+      var path = d3.geo.path()
+        .projection(projection);
+
+      svg.selectAll(".subunit")
+        .data(topojson.feature(uk, uk.objects.output).features)
+        .enter().append("path")
+        .attr("class", function(d) {
+          name = "";
+          if (d.properties.name) {
+            name = d.properties.name.replace(" ", "_")
+          }
+          return "subunit " + name;
+        })
+        .attr("d", path);
+
+      $.get('/initial', handle_message);
+    });
+    var es = new EventSource('/connect');
+    es.onmessage = handle_server_event;
+  </script>
+</html>

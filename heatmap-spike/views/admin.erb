@@ -1,0 +1,17 @@
+<div id="wrapper">
+  <input type=text id=message placeholder="Enter Notification Here"></input>
+  <input type=button id=send data-role=button value="push"></input>
+</div>
+
+<script>
+  $("#send").click(function(event) {
+    event.preventDefault();
+
+    var text = $("#message").val();
+    var message = text.split(" ")[1];
+    var target = text.split(" ")[0];
+    var notification = { target: target, value: message };
+
+    $.post("/push", notification, "json");
+  });
+</script>
