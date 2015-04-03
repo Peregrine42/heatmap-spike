@@ -20,9 +20,18 @@ def current_state
   {
     'timestamp' => timestamp,
     'events' => [
-      { 'target' => 'cumbria', 'value' => '0.4' },
-      { 'target' => 'caerphilly', 'value' => '-0.2' },
-      { 'target' => 'nottinghamshire', 'value' => '0.9' }
+      { 'id' => '1',
+        'lon' => '1.315464038567282',
+        'lat' => '52.093199147268486',
+        'value' => '0.4' },
+      { 'id' => '2',
+        'lon' => '-3.375123246720891',
+        'lat' => '55.922959691995956',
+        'value' => '-1' },
+      { 'id' => '3',
+        'lon' => '-0.13896573405726872',
+        'lat' => '51.521155548062815',
+        'value' => '0.9' }
     ]
   }.to_json
 end
@@ -56,4 +65,6 @@ post '/push' do
   }
 
   connections.each { |out| out << "data: #{message.to_json}\n\n" }
+  content_type :json
+  { "done" => true }.to_json
 end

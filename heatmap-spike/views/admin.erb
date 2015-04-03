@@ -8,9 +8,16 @@
     event.preventDefault();
 
     var text = $("#message").val();
-    var message = text.split(" ")[1];
-    var target = text.split(" ")[0];
-    var notification = { target: target, value: message };
+    var args = text.split(" ");
+    var id = args[0];
+    var value = args[1];
+    var lon = args[2];
+    var lat = args[3];
+    var notification = { id: id, value: value };
+    if (lon && lat) {
+      notification.lon = lon;
+      notification.lat = lon;
+    }
 
     $.post("/push", notification, "json");
   });

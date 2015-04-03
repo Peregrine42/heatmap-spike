@@ -1,5 +1,14 @@
 <html>
   <head>
+    <style>
+      .pi-dot {
+        stroke: white;
+        stroke-width: 2;
+      }
+      .subunit {
+        stroke: gray;
+        stroke-width: 1;
+    </style>
   </head>
   <body>
     <div id="container" style="background-color: white; position: relative; width: 1000; height: 600;"></div>
@@ -10,10 +19,29 @@
   <script src="jquery.min.js"></script>
   <script src="velocity.min.js"></script>
   <script>
+    function make_element(id, lon, lat) {
+      var lon = parseFloat(lon);
+      var lat = parseFloat(lat);
+      console.log(lon);
+      svg.append("circle")
+        .attr("r", 20)
+        .attr("class", "pi-dot")
+        .attr("id", id)
+        .attr("transform", function() {
+          return "translate(" + projection([lon, lat]) + ")";
+        });
+      return $("#" + id);
+    }
+
     function handle_message(data) {
       var msg = $.parseJSON(data);
       msg.events.forEach(function(item) {
-        var element = $("." + item.target);
+        var element = $("#" + item.id);
+
+        console.log(element);
+        if (element.empty()) {
+          var element = make_element(item.id, item.lon, item.lat);
+        }
 
         var value = parseFloat(item.value);
         element.velocity({fill: color(value) }, {duration: 1000})
@@ -25,13 +53,13 @@
     };
 
     var width = $(window).width();
-    var height = width;
+    var height = 1200;
     $("#container").width(width);
     $("#container").height(height);
 
     var highlight = "#FF0000";
     var lowlight = "#895CCD";
-    var normal = "#000000";
+    var normal = "#333333";
 
     var color = d3.scale.linear()
       .domain([-1, 0, 1])
@@ -40,11 +68,11 @@
     d3.json("uk_areas.json", function(error, uk) {
       if (error) return console.error(error);
 
-      var svg = d3.select("#container").append("svg")
+      svg = d3.select("#container").append("svg")
         .attr("width", width)
         .attr("height", height);
 
-      var projection = d3.geo.albers()
+      projection = d3.geo.albers()
         .center([0, 55.4])
         .rotate([4.4, 0])
         .parallels([50, 60])
@@ -57,6 +85,7 @@
       svg.selectAll(".subunit")
         .data(topojson.feature(uk, uk.objects.output).features)
         .enter().append("path")
+        .attr("fill", normal)
         .attr("class", function(d) {
           name = "";
           if (d.properties.name) {
