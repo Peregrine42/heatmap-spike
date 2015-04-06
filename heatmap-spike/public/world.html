@@ -21,19 +21,15 @@
   <script>
     function arcTween(transition, new_angle) {
       transition.attrTween("d", function(d) {
-        console.log(d);
         var interpolate = d3.interpolate(d.endAngle, new_angle);
         return function(t) {
           d.endAngle = interpolate(t);
-
-          //console.log(d.endAngle);
-          console.log(d);
           return arc(d);
         }
       });
     }
 
-    τ = (1 * Math.PI);
+    half_tau = Math.PI;
     function make_element(id, lon, lat) {
       var lon = parseFloat(lon);
       var lat = parseFloat(lat);
@@ -55,7 +51,7 @@
       var data = 0;
       blue_group
         .append('path')
-        .datum({endAngle: (0 * τ)})
+        .datum({endAngle: (-0.5 * half_tau)+(0 * half_tau)})
         .attr('d', arc)
         .attr('fill', 'blue')
     }
@@ -72,7 +68,7 @@
         path = svg.select("#" + item.id).select('path')
           .transition()
           .duration(2000)
-          .call(arcTween, (-0.5 * τ)+(data * τ));
+          .call(arcTween, (-0.5 * half_tau)+(data * half_tau));
       })
     };
 
@@ -96,13 +92,13 @@
     arc = d3.svg.arc()
       .innerRadius(0)
       .outerRadius(20)
-      .startAngle((-0.5 * τ)-(0 * τ))
+      .startAngle((-0.5 * half_tau)+(0 * half_tau))
 
     background_arc = d3.svg.arc()
       .innerRadius(0)
       .outerRadius(20)
-      .startAngle((-0.5 * τ))
-      .endAngle((-0.5 * τ)+(1 * τ))
+      .startAngle((-0.5 * half_tau))
+      .endAngle((-0.5 * half_tau)+(1 * half_tau))
 
     d3.json("uk_areas.json", function(error, uk) {
       if (error) return console.error(error);
