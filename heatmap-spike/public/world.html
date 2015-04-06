@@ -19,32 +19,54 @@
   <script src="jquery.min.js"></script>
   <script src="velocity.min.js"></script>
   <script>
+    function arcTween(a) {
+      var i = d3.interpolate(this._current, a);
+      this._current = i(0);
+      return function(t) {
+        return arc(i(t));
+      };
+    }
     function make_element(id, lon, lat) {
       var lon = parseFloat(lon);
       var lat = parseFloat(lat);
-      console.log(lon);
-      svg.append("circle")
-        .attr("r", 20)
-        .attr("class", "pi-dot")
-        .attr("id", id)
-        .attr("transform", function() {
-          return "translate(" + projection([lon, lat]) + ")";
-        });
-      return $("#" + id);
+
+      var group = svg.append('g')
+        .attr(
+          'transform',
+          'translate(' + projection([lon, lat]) + ')')
+        .attr('id', id)
+        .attr('class', 'pi-dot');
+
+      var data = [0.0001]
+      group.datum(data).selectAll('path')
+        .data(pie)
+        .enter()
+        .append('path')
+        .attr('d', arc)
+        .attr('fill', function(d, i) {
+          return (i % 2) ? "red" : "blue"
+        })
+        .each(function(d) { this._current = d; });
     }
 
     function handle_message(data) {
       var msg = $.parseJSON(data);
       msg.events.forEach(function(item) {
-        var element = $("#" + item.id);
-
-        console.log(element);
-        if (element.empty()) {
-          var element = make_element(item.id, item.lon, item.lat);
+        if (item.lon != NaN && item.lat != NaN && item.lon != undefined && item.lat != undefined) {
+          d3.select("#" + item.id).remove();
+          make_element(item.id, item.lon, item.lat);
         }
 
         var value = parseFloat(item.value);
-        element.velocity({fill: color(value) }, {duration: 1000})
+        var data = [value];
+        path = svg.datum(data)
+          .select('#' + item.id)
+          .selectAll('path')
+          .data(pie);
+        path.transition()
+          .delay(function(d, i) { return 500 * i })
+          .duration(500)
+          .attrTween("d", arcTween);
       })
     };
 
@@ -64,6 +86,13 @@
     var color = d3.scale.linear()
       .domain([-1, 0, 1])
       .range([lowlight, normal, highlight]);
+
+    pie = d3.layout.pie()
+      .startAngle(-90 * (Math.PI/180))
+      .endAngle(90 * (Math.PI/180))
+
+    arc = d3.svg.arc()
+      .outerRadius(20)
 
     d3.json("uk_areas.json", function(error, uk) {
       if (error) return console.error(error);
@@ -99,5 +128,6 @@
     });
     var es = new EventSource('/connect');
     es.onmessage = handle_server_event;
+
   </script>
 </html>

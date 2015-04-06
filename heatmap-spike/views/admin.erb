@@ -16,7 +16,7 @@
     var notification = { id: id, value: value };
     if (lon && lat) {
       notification.lon = lon;
-      notification.lat = lon;
+      notification.lat = lat;
     }
 
     $.post("/push", notification, "json");
