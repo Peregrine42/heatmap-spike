@@ -19,34 +19,45 @@
   <script src="jquery.min.js"></script>
   <script src="velocity.min.js"></script>
   <script>
-    function arcTween(a) {
-      var i = d3.interpolate(this._current, a);
-      this._current = i(0);
-      return function(t) {
-        return arc(i(t));
-      };
+    function arcTween(transition, new_angle) {
+      transition.attrTween("d", function(d) {
+        console.log(d);
+        var interpolate = d3.interpolate(d.endAngle, new_angle);
+        return function(t) {
+          d.endAngle = interpolate(t);
+
+          //console.log(d.endAngle);
+          console.log(d);
+          return arc(d);
+        }
+      });
     }
+
+    τ = (1 * Math.PI);
     function make_element(id, lon, lat) {
       var lon = parseFloat(lon);
       var lat = parseFloat(lat);
 
-      var group = svg.append('g')
+      var main_group = svg.append('g')
         .attr(
           'transform',
           'translate(' + projection([lon, lat]) + ')')
-        .attr('id', id)
         .attr('class', 'pi-dot');
 
-      var data = [0.0001]
-      group.datum(data).selectAll('path')
-        .data(pie)
-        .enter()
+      var red_group = main_group.append('g')
+          .append('path')
+          .attr('d', background_arc)
+          .attr('fill', "red")
+
+      var blue_group = main_group.append('g')
+          .attr('id', id)
+
+      var data = 0;
+      blue_group
         .append('path')
+        .datum({endAngle: (0 * τ)})
         .attr('d', arc)
-        .attr('fill', function(d, i) {
-          return (i % 2) ? "red" : "blue"
-        })
-        .each(function(d) { this._current = d; });
+        .attr('fill', 'blue')
     }
 
     function handle_message(data) {
@@ -57,16 +68,11 @@
           make_element(item.id, item.lon, item.lat);
         }
 
-        var value = parseFloat(item.value);
-        var data = [value];
-        path = svg.datum(data)
-          .select('#' + item.id)
-          .selectAll('path')
-          .data(pie);
-        path.transition()
-          .delay(function(d, i) { return 500 * i })
-          .duration(500)
-          .attrTween("d", arcTween);
+        var data = parseFloat(item.value);
+        path = svg.select("#" + item.id).select('path')
+          .transition()
+          .duration(2000)
+          .call(arcTween, (-0.5 * τ)+(data * τ));
       })
     };
 
@@ -87,12 +93,16 @@
       .domain([-1, 0, 1])
       .range([lowlight, normal, highlight]);
 
-    pie = d3.layout.pie()
-      .startAngle(-90 * (Math.PI/180))
-      .endAngle(90 * (Math.PI/180))
-
     arc = d3.svg.arc()
+      .innerRadius(0)
       .outerRadius(20)
+      .startAngle((-0.5 * τ)-(0 * τ))
+
+    background_arc = d3.svg.arc()
+      .innerRadius(0)
+      .outerRadius(20)
+      .startAngle((-0.5 * τ))
+      .endAngle((-0.5 * τ)+(1 * τ))
 
     d3.json("uk_areas.json", function(error, uk) {
       if (error) return console.error(error);
