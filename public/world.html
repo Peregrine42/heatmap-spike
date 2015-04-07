@@ -29,36 +29,52 @@
       });
     }
 
-    half_tau = Math.PI;
-
     function chart_radians(data) {
-      return (data * half_tau)
+      return (data * Math.PI)
     }
 
     function make_element(id, lon, lat) {
       var lon = parseFloat(lon);
       var lat = parseFloat(lat);
-
       var main_group = svg.append('g')
         .attr(
           'transform',
           'translate(' + projection([lon, lat]) + ')')
         .attr('class', 'pi-dot');
 
-      var red_group = main_group.append('g')
+      var pie_group = main_group.append('g')
+      var pie_back_group = pie_group.append('g')
           .append('path')
           .attr('d', background_arc)
-          .attr('fill', "red")
+          .attr('fill', "blue")
 
-      var blue_group = main_group.append('g')
+      var pie_front_group = pie_group.append('g')
           .attr('id', id)
 
       var data = 0;
-      blue_group
+      pie_front_group
         .append('path')
         .datum({endAngle: chart_radians(0) })
         .attr('d', arc)
-        .attr('fill', 'blue')
+        .attr('fill', 'red')
+
+      var bar_group = main_group.append('g')
+      var bar_back_group = bar_group.append('g')
+        .append('rect')
+          .attr('x', -20)
+          .attr('y', -15)
+          .attr('width', 15)
+          .attr('height', 30)
+          .attr('fill', 'red')
+
+      var bar_front_group = bar_group.append('g')
+        .attr('id', id + '-packet-loss')
+        .append('rect')
+          .attr('x', -20)
+          .attr('y', -15)
+          .attr('width', 15)
+          .attr('height', 0)
+          .attr('fill', 'blue')
     }
 
     function handle_message(data) {
@@ -69,11 +85,26 @@
           make_element(item.id, item.lon, item.lat);
         }
 
-        var data = parseFloat(item.value);
+        var data = parseFloat(item.ping_rating);
         path = svg.select("#" + item.id).select('path')
           .transition()
           .duration(750)
           .call(arcTween, chart_radians(data));
+
+        var packet_loss_data = parseFloat(item.packet_loss_rating)
+        $('#' + item.id + '-packet-loss :first-child').velocity({ 'height': 30*packet_loss_data })
+
+        if (packet_loss_data < 0.6) {
+          $('#' + item.id + '-packet-loss').parent().velocity({ 'opacity': 0 })
+        } else {
+          $('#' + item.id + '-packet-loss').parent().velocity({ 'opacity': 1 })
+        }
+
+        if (data < 0.6) {
+          $('#' + item.id).parent().velocity({ 'opacity': 0 })
+        } else {
+          $('#' + item.id).parent().velocity({ 'opacity': 1 })
+        }
       })
     };
 
@@ -94,7 +125,7 @@
       .domain([-1, 0, 1])
       .range([lowlight, normal, highlight]);
 
-    var radius = 15;
+    radius = 15;
     arc = d3.svg.arc()
       .innerRadius(0)
       .outerRadius(radius)

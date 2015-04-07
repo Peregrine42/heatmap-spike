@@ -11,9 +11,10 @@
     var args = text.split(" ");
     var id = args[0];
     var value = args[1];
-    var lon = args[2];
-    var lat = args[3];
-    var notification = { id: id, value: value };
+    var packet_loss = args[2];
+    var lon = args[3];
+    var lat = args[4];
+    var notification = { id: id, ping_rating: value, packet_loss_rating: packet_loss };
     if (lon && lat) {
       notification.lon = lon;
       notification.lat = lat;

@@ -23,23 +23,33 @@ def current_state
       { 'id' => 'test1',
         'lon' => '-1.9079513987271581',
         'lat' => '52.48033691054388',
-        'value' => '0.1' },
+        'ping_rating' => '1',
+        'packet_loss_rating' => '1'
+      },
       { 'id' => 'test2',
         'lon' => '1.315464038567282',
         'lat' => '52.093199147268486',
-        'value' => '0.2' },
+        'ping_rating' => '0',
+        'packet_loss_rating' => '0'
+      },
       { 'id' => 'test3',
         'lon' => '-3.375123246720891',
         'lat' => '55.922959691995956',
-        'value' => '0.3' },
+        'ping_rating' => '0',
+        'packet_loss_rating' => '1'
+      },
       { 'id' => 'test4',
         'lon' => '-0.13896573405726872',
         'lat' => '51.521155548062815',
-        'value' => '0.4' },
+        'ping_rating' => '0.4',
+        'packet_loss_rating' => '0.2'
+      },
       { 'id' => 'test5',
         'lon' => '-2.2362957095513725',
         'lat' => '53.47771214497476',
-        'value' => '0.5' }
+        'ping_rating' => '0.5',
+        'packet_loss_rating' => '0.1'
+      }
     ]
   }.to_json
 end
