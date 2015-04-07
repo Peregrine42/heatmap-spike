@@ -30,6 +30,11 @@
     }
 
     half_tau = Math.PI;
+
+    function chart_radians(data) {
+      return (-0.5 * half_tau)+(data * half_tau)
+    }
+
     function make_element(id, lon, lat) {
       var lon = parseFloat(lon);
       var lat = parseFloat(lat);
@@ -51,7 +56,7 @@
       var data = 0;
       blue_group
         .append('path')
-        .datum({endAngle: (-0.5 * half_tau)+(0 * half_tau)})
+        .datum({endAngle: chart_radians(0) })
         .attr('d', arc)
         .attr('fill', 'blue')
     }
@@ -67,8 +72,8 @@
         var data = parseFloat(item.value);
         path = svg.select("#" + item.id).select('path')
           .transition()
-          .duration(2000)
-          .call(arcTween, (-0.5 * half_tau)+(data * half_tau));
+          .duration(750)
+          .call(arcTween, chart_radians(data));
       })
     };
 
@@ -93,13 +98,13 @@
     arc = d3.svg.arc()
       .innerRadius(0)
       .outerRadius(radius)
-      .startAngle((-0.5 * half_tau)+(0 * half_tau))
+      .startAngle(chart_radians(0))
 
     background_arc = d3.svg.arc()
       .innerRadius(0)
       .outerRadius(radius)
-      .startAngle(-0.5 * half_tau)
-      .endAngle((-0.5 * half_tau)+(1 * half_tau))
+      .startAngle(chart_radians(0))
+      .endAngle(chart_radians(1))
 
     d3.json("uk_areas.json", function(error, uk) {
       if (error) return console.error(error);
